@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28187541902",
+    "project_id": "snapvote-hila-2026",
+    "storage_bucket": "snapvote-hila-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28187541902:android:0ad9765b5708c5ecdc64df",
+        "android_client_info": {
+          "package_name": "com.hila.snapvote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr9ctGjZt2hQQa-Fq9Igf9lQAGO7l5iIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

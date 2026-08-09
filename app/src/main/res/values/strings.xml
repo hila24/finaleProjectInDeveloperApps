@@ -1,0 +1,124 @@
+<resources>
+    <string name="app_name">SnapVote</string>
+    <string name="tagline">העלו · דרגו · היעלמו</string>
+
+    <!-- Auth -->
+    <string name="login">התחברות</string>
+    <string name="register">הרשמה</string>
+    <string name="email">אימייל</string>
+    <string name="username">שם משתמש</string>
+    <string name="username_helper">כך חברים ימצאו אותך — השם חייב להיות ייחודי</string>
+    <string name="password">סיסמה</string>
+    <string name="no_account">אין לך חשבון? הירשמי</string>
+    <string name="have_account">יש לך כבר חשבון? התחברי</string>
+    <string name="logout">התנתקות</string>
+    <string name="error_empty_fields">יש למלא את כל השדות</string>
+    <string name="error_short_password">הסיסמה חייבת להכיל לפחות 6 תווים</string>
+    <string name="error_invalid_email">כתובת אימייל לא תקינה</string>
+    <string name="error_short_username">שם המשתמש חייב להכיל לפחות 2 תווים</string>
+
+    <!-- Feed -->
+    <string name="feed_title">הסקרים של החברים</string>
+    <string name="feed_empty">אין סקרים פעילים של חברים.\nהוסיפי חברים מהפרופיל כדי לראות את הסקרים שלהן</string>
+    <string name="new_poll">סקר חדש</string>
+    <string name="time_left_hours">⏳ נותרו %1$d שעות</string>
+    <string name="time_left_minutes">⏳ נותרו %1$d דקות</string>
+    <string name="time_left_days">⏳ נותרו %1$d ימים</string>
+    <string name="poll_closed">הסקר נסגר</string>
+    <string name="votes_count">%1$d הצבעות</string>
+    <string name="by_owner">מאת %1$s</string>
+
+    <!-- Create poll -->
+    <string name="create_poll_title">יצירת סקר חדש</string>
+    <string name="poll_question_hint">מה השאלה? למשל: איזו תמונה לפרופיל?</string>
+    <string name="upload_images">העלאת תמונות</string>
+    <string name="pick_from_gallery">מהגלריה</string>
+    <string name="take_photo">מהמצלמה</string>
+    <string name="deadline">מועד סיום</string>
+    <string name="deadline_hours">בעוד %1$d שעות</string>
+    <string name="vote_mode">סוג ההצבעה</string>
+    <string name="mode_single">בחירת תמונה אחת</string>
+    <string name="mode_rating">דירוג בכוכבים</string>
+    <string name="publish_poll">פרסום הסקר</string>
+    <string name="error_need_two_images">צריך להעלות לפחות 2 תמונות</string>
+    <string name="error_need_question">יש לכתוב שאלה לסקר</string>
+    <string name="uploading">מעלה תמונות…</string>
+    <string name="remove_image">הסרת תמונה</string>
+
+    <!-- Vote -->
+    <string name="vote_title">במה לבחור?</string>
+    <string name="image_label">תמונה %1$s</string>
+    <string name="rate_hint">דרגו כל תמונה</string>
+    <string name="send_vote">שליחת הצבעה</string>
+    <string name="already_voted">כבר הצבעת בסקר הזה</string>
+    <string name="vote_saved">ההצבעה נשמרה!</string>
+    <string name="error_pick_one">יש לבחור תמונה אחת</string>
+    <string name="error_rate_all">יש לדרג את כל התמונות</string>
+    <string name="view_results">צפייה בתוצאות</string>
+
+    <!-- Results -->
+    <string name="results_title">תוצאות הסקר</string>
+    <string name="winner">🏆 התמונה המנצחת</string>
+    <string name="image_percent">תמונה %1$s — %2$d%%</string>
+    <string name="images_will_be_deleted">⏳ התמונות יימחקו בתום הסקר</string>
+    <string name="images_deleted">התמונות נמחקו אוטומטית 🗑️</string>
+    <string name="avg_rating">דירוג ממוצע: %1$s</string>
+    <string name="share_poll">שיתוף עם חברים</string>
+    <string name="share_text">הצביעו בסקר שלי ב‑SnapVote: %1$s\n%2$s</string>
+    <string name="poll_link">https://snapvote-hila-2026.web.app/poll/%1$s</string>
+    <string name="poll_not_visible">אין לך גישה לסקר הזה — צריך להיות ברשימת החברים של מי שיצרה אותו</string>
+
+    <!-- Profile -->
+    <string name="profile_title">הפרופיל שלי</string>
+    <string name="polls_created">סקרים שיצרתי</string>
+    <string name="votes_given">הצבעות שנתתי</string>
+    <string name="history">היסטוריה</string>
+    <string name="my_polls">הסקרים שלי</string>
+    <string name="delete_poll">מחיקת הסקר</string>
+    <string name="delete_poll_confirm">למחוק את הסקר וכל התמונות שלו?</string>
+    <string name="cancel">ביטול</string>
+    <string name="delete">מחיקה</string>
+
+    <!-- Friends -->
+    <string name="friends_title">החברים שלי</string>
+    <string name="friends_explain">רק חברים שברשימה רואים את הסקרים שלך, ורק הסקרים שלהם מופיעים לך בפיד.</string>
+    <string name="friend_search_hint">שם משתמש של חברה</string>
+    <string name="search">חיפוש</string>
+    <string name="add_friend">הוספה</string>
+    <string name="my_friends">רשימת החברים</string>
+    <string name="friends_empty">עוד אין לך חברים ברשימה.\nחפשי לפי שם משתמש והוסיפי</string>
+    <string name="remove_friend">הסרת חברה</string>
+    <string name="remove_friend_confirm">להסיר את %1$s מרשימת החברים?</string>
+    <string name="remove">הסרה</string>
+    <string name="friends_count">חברים</string>
+    <string name="error_username_taken">שם המשתמש הזה כבר תפוס, נסי אחר</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">תזכורות לסקרים</string>
+    <string name="notification_channel_description">התראה לפני שסקר נסגר וכשהוא נסגר</string>
+    <string name="notify_reminder_title">⏳ נותרה שעה להצבעה</string>
+    <string name="notify_reminder_text">הסקר \"%1$s\" נסגר בעוד שעה</string>
+    <string name="notify_closed_title">🏆 הסקר נסגר</string>
+    <string name="notify_closed_text">אפשר לראות מי ניצחה בסקר \"%1$s\"</string>
+
+    <!-- Comments -->
+    <string name="comments_title">תגובות</string>
+    <string name="comments_empty">אין עדיין תגובות. כתבי ראשונה!</string>
+    <string name="comment_hint">מה דעתך?</string>
+    <string name="send_comment">שליחה</string>
+    <string name="delete_comment">מחיקת תגובה</string>
+    <string name="delete_comment_confirm">למחוק את התגובה?</string>
+
+    <!-- Voters -->
+    <string name="voters_title">מי הצביע</string>
+    <string name="voters_empty">עוד אף אחד לא הצביע בסקר הזה</string>
+    <string name="voter_chose">בחרה בתמונה %1$s</string>
+    <string name="voter_rated">דירגה: %1$s</string>
+    <string name="see_voters">מי הצביע</string>
+
+    <!-- Nav -->
+    <string name="nav_feed">פיד</string>
+    <string name="nav_profile">פרופיל</string>
+    <string name="back">חזרה</string>
+    <string name="poll_image">תמונה בסקר</string>
+</resources>

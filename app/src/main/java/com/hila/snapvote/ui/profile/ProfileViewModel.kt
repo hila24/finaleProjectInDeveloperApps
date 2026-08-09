@@ -1,0 +1,59 @@
+package com.hila.snapvote.ui.profile
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hila.snapvote.data.model.Poll
+import com.hila.snapvote.data.model.User
+import com.hila.snapvote.data.repository.AuthRepository
+import com.hila.snapvote.data.repository.FriendRepository
+import com.hila.snapvote.data.repository.PollRepository
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+
+class ProfileViewModel(
+    private val auth: AuthRepository = AuthRepository(),
+    private val polls: PollRepository = PollRepository(),
+    private val friends: FriendRepository = FriendRepository(),
+) : ViewModel() {
+
+    private val _user = MutableLiveData<User?>()
+    val user: LiveData<User?> = _user
+
+    private val _friendsCount = MutableLiveData(0)
+    val friendsCount: LiveData<Int> = _friendsCount
+
+    private val _myPolls = MutableLiveData<List<Poll>>()
+    val myPolls: LiveData<List<Poll>> = _myPolls
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
+    init {
+        viewModelScope.launch {
+            auth.currentUserFlow()
+                .catch { _error.value = it.message }
+                .collect { _user.value = it }
+        }
+        val uid = auth.currentUid
+        if (uid != null) {
+            viewModelScope.launch {
+                polls.myPollsFlow(uid)
+                    .catch { _error.value = it.message }
+                    .collect { _myPolls.value = it }
+            }
+            viewModelScope.launch {
+                friends.friendsFlow(uid)
+                    .catch { _error.value = it.message }
+                    .collect { _friendsCount.value = it.size }
+            }
+        }
+    }
+
+    fun logout() = auth.logout()
+
+    fun errorShown() {
+        _error.value = null
+    }
+}

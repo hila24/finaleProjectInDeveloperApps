@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hila.snapvote",
+      "sha256_cert_fingerprints": [
+        "C4:40:86:5A:B7:05:C8:6A:ED:95:C7:EC:96:17:DA:05:0C:CA:C5:A5:4A:6D:1B:34:42:96:A0:1C:76:10:8C:DD"
+      ]
+    }
+  }
+]

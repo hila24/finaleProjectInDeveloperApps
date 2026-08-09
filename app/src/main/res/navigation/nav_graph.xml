@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.hila.snapvote.ui.auth.LoginFragment"
+        android:label="@string/login">
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.hila.snapvote.ui.auth.RegisterFragment"
+        android:label="@string/register" />
+
+    <fragment
+        android:id="@+id/feedFragment"
+        android:name="com.hila.snapvote.ui.feed.FeedFragment"
+        android:label="@string/feed_title">
+        <action
+            android:id="@+id/action_feed_to_create"
+            app:destination="@id/createPollFragment" />
+        <action
+            android:id="@+id/action_feed_to_vote"
+            app:destination="@id/voteFragment" />
+        <action
+            android:id="@+id/action_feed_to_results"
+            app:destination="@id/resultsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createPollFragment"
+        android:name="com.hila.snapvote.ui.create.CreatePollFragment"
+        android:label="@string/create_poll_title">
+        <action
+            android:id="@+id/action_create_to_results"
+            app:destination="@id/resultsFragment"
+            app:popUpTo="@id/feedFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/voteFragment"
+        android:name="com.hila.snapvote.ui.vote.VoteFragment"
+        android:label="@string/vote_title">
+        <argument
+            android:name="pollId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_vote_to_results"
+            app:destination="@id/resultsFragment"
+            app:popUpTo="@id/feedFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/resultsFragment"
+        android:name="com.hila.snapvote.ui.results.ResultsFragment"
+        android:label="@string/results_title">
+        <argument
+            android:name="pollId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_results_to_voters"
+            app:destination="@id/votersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/votersFragment"
+        android:name="com.hila.snapvote.ui.voters.VotersFragment"
+        android:label="@string/voters_title">
+        <argument
+            android:name="pollId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.hila.snapvote.ui.profile.ProfileFragment"
+        android:label="@string/profile_title">
+        <action
+            android:id="@+id/action_profile_to_results"
+            app:destination="@id/resultsFragment" />
+        <action
+            android:id="@+id/action_profile_to_friends"
+            app:destination="@id/friendsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.hila.snapvote.ui.friends.FriendsFragment"
+        android:label="@string/friends_title" />
+
+    <action
+        android:id="@+id/action_global_login"
+        app:destination="@id/loginFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_feed"
+        app:destination="@id/feedFragment"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
+
+</navigation>

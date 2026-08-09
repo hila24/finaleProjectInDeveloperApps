@@ -1,0 +1,79 @@
+package com.hila.snapvote.ui.feed
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hila.snapvote.data.model.Poll
+import com.hila.snapvote.data.repository.AuthRepository
+import com.hila.snapvote.data.repository.PollRepository
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+
+class FeedViewModel(
+    private val polls: PollRepository = PollRepository(),
+    private val auth: AuthRepository = AuthRepository(),
+) : ViewModel() {
+
+    private val _activePolls = MutableLiveData<List<Poll>>()
+    val activePolls: LiveData<List<Poll>> = _activePolls
+
+    private val _loading = MutableLiveData(true)
+    val loading: LiveData<Boolean> = _loading
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
+    /** Poll ids the signed-in user already voted in – drives the "כבר הצבעת" badge. */
+    private val _votedPollIds = MutableLiveData<Set<String>>(emptySet())
+    val votedPollIds: LiveData<Set<String>> = _votedPollIds
+
+    val currentUid: String? get() = auth.currentUid
+
+    init {
+        observePolls()
+        cleanupFinishedPolls()
+    }
+
+    private fun observePolls() {
+        val uid = auth.currentUid
+        if (uid == null) {
+            _loading.value = false
+            return
+        }
+        viewModelScope.launch {
+            polls.activePollsFlow(uid)
+                .catch { throwable ->
+                    _loading.value = false
+                    _error.value = throwable.message ?: "שגיאה בטעינת הסקרים"
+                }
+                .collect { list ->
+                    // The feed is "הסקרים של החברים" – my own polls live in the profile.
+                    val friendsPolls = list.filterNot { it.ownerId == uid }
+                    _activePolls.value = friendsPolls
+                    _loading.value = false
+                    refreshVotedState(friendsPolls)
+                }
+        }
+    }
+
+    private fun refreshVotedState(list: List<Poll>) {
+        val uid = auth.currentUid ?: return
+        viewModelScope.launch {
+            _votedPollIds.value = list
+                .filter { poll -> runCatching { polls.myVote(poll.id, uid) != null }.getOrDefault(false) }
+                .map { it.id }
+                .toSet()
+        }
+    }
+
+    /** Deletes the images of the user's own polls whose deadline already passed. */
+    private fun cleanupFinishedPolls() {
+        val uid = auth.currentUid ?: return
+        viewModelScope.launch { runCatching { polls.cleanupExpiredPollsOf(uid) } }
+    }
+
+    fun errorShown() {
+        _error.value = null
+    }
+}
