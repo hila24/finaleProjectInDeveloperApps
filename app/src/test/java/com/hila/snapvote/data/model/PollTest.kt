@@ -168,10 +168,13 @@ class PollTest {
     }
 
     @Test
-    fun `the owner still sees the thumbnails after the full images were wiped`() {
-        val cleaned = poll(hoursFromNow = -2).copy(imagesDeleted = true)
-        assertTrue(cleaned.showsImagesTo("owner"))
-        assertFalse(cleaned.showsImagesTo(friend))
+    fun `an older poll that was wiped before still follows the same rule`() {
+        // imagesDeleted is only true on polls created while the app still deleted
+        // pictures at the deadline. Visibility never depended on it – it is the
+        // deadline and the viewer that decide.
+        val wiped = poll(hoursFromNow = -2).copy(imagesDeleted = true)
+        assertTrue(wiped.showsImagesTo("owner"))
+        assertFalse(wiped.showsImagesTo(friend))
     }
 
     @Test

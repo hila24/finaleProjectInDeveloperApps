@@ -287,26 +287,6 @@ class PollRepository(
         pollRef.delete().await()
     }
 
-    /**
-     * "התמונות נמחקות בתום הסקר" – for every finished poll of [uid] the pictures are
-     * wiped (full images and thumbnails) while the results stay in Firestore.
-     * Runs from the feed, so it happens whenever the owner opens the app.
-     */
-    suspend fun cleanupExpiredPollsOf(uid: String) {
-        val snapshot = db.collection(POLLS).whereEqualTo("ownerId", uid).get().await()
-        snapshot.toObjects(Poll::class.java)
-            .filter { it.isClosed && !it.imagesDeleted }
-            .forEach { poll ->
-                // Only the full-size copies go. The thumbnails stay on the poll document
-                // so the owner keeps their own history – they are ~12KB against ~930KB,
-                // so this still reclaims almost all of the space.
-                deleteImageDocuments(poll.id)
-                db.collection(POLLS).document(poll.id)
-                    .update("imagesDeleted", true)
-                    .await()
-            }
-    }
-
     private suspend fun deleteImageDocuments(pollId: String) {
         db.collection(POLLS).document(pollId).collection(IMAGES).get().await()
             .documents.forEach { it.reference.delete().await() }

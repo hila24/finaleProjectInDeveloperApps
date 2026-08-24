@@ -52,10 +52,6 @@ object PollNotifications {
      *
      * [withReminder] is false for someone who has already voted: the closing result is
      * still worth a notification, but "hurry up and vote" no longer is.
-     *
-     * [ownerId] is passed only by the poll's author, on their own phone. It lets the
-     * closing job also delete the pictures at the deadline instead of waiting for their
-     * next visit to the app – nobody else is allowed to delete them.
      */
     fun scheduleFor(
         context: Context,
@@ -63,7 +59,6 @@ object PollNotifications {
         question: String,
         deadline: Date,
         withReminder: Boolean = true,
-        ownerId: String? = null,
     ) {
         val millisLeft = deadline.time - System.currentTimeMillis()
         if (millisLeft <= 0) return
@@ -73,12 +68,12 @@ object PollNotifications {
         if (withReminder && beforeClosing > 0) {
             enqueue(
                 context, pollId, question, beforeClosing,
-                PollDeadlineWorker.KIND_REMINDER, deadline.time, ownerId = null
+                PollDeadlineWorker.KIND_REMINDER, deadline.time
             )
         }
         enqueue(
             context, pollId, question, millisLeft,
-            PollDeadlineWorker.KIND_CLOSED, deadline.time, ownerId
+            PollDeadlineWorker.KIND_CLOSED, deadline.time
         )
     }
 
@@ -116,7 +111,6 @@ object PollNotifications {
         delayMillis: Long,
         kind: String,
         deadlineMillis: Long,
-        ownerId: String?,
     ) {
         val request = OneTimeWorkRequestBuilder<PollDeadlineWorker>()
             .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
@@ -127,7 +121,6 @@ object PollNotifications {
                     .putString(PollDeadlineWorker.KEY_QUESTION, question)
                     .putString(PollDeadlineWorker.KEY_KIND, kind)
                     .putLong(PollDeadlineWorker.KEY_DEADLINE, deadlineMillis)
-                    .apply { if (ownerId != null) putString(PollDeadlineWorker.KEY_OWNER_ID, ownerId) }
                     .build()
             )
             .build()

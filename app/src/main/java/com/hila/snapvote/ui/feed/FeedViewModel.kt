@@ -44,7 +44,6 @@ class FeedViewModel(
 
     init {
         observePolls()
-        cleanupFinishedPolls()
     }
 
     private fun observePolls() {
@@ -101,12 +100,6 @@ class FeedViewModel(
                 withReminder = poll.id !in voted,
             )
         }
-    }
-
-    /** Deletes the images of the user's own polls whose deadline already passed. */
-    private fun cleanupFinishedPolls() {
-        val uid = auth.currentUid ?: return
-        viewModelScope.launch { runCatching { polls.cleanupExpiredPollsOf(uid) } }
     }
 
     fun errorShown() {
