@@ -41,8 +41,16 @@ service cloud.firestore {
     // polls/{pollId}
     match /polls/{pollId} {
       // Only the owner and the friends captured in visibleTo can read a poll.
-      // The field is a plain array, so this costs no extra document reads.
-      allow read: if signedIn() && request.auth.uid in resource.data.visibleTo;
+      //
+      // Ownership is spelled out even though the owner is always inside visibleTo,
+      // because rules are not filters: a query is allowed only when its own
+      // constraints prove the rule. "הסקרים שלי" asks for ownerId == me and says
+      // nothing about visibleTo, so without this branch the whole query is denied
+      // and the screen falls back to whatever the local cache happens to hold.
+      allow read: if signedIn() && (
+        resource.data.ownerId == request.auth.uid ||
+        request.auth.uid in resource.data.visibleTo
+      );
 
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid

@@ -9,7 +9,7 @@ import {
 import { Timestamp } from 'firebase/firestore';
 import {
   FRIEND, OWNER, POLL_ID, PRIVATE_POLL_ID, STRANGER,
-  as, makeTestEnv, seed,
+  as, makeTestEnv, pollDoc, seed,
 } from './helpers.mjs';
 
 describe('חברים', () => {
@@ -100,6 +100,36 @@ describe('חברים', () => {
   it('asking for every poll instead of only mine is rejected', async () => {
     const db = as(env, FRIEND);
     await assertFails(getDocs(collection(db, 'polls')));
+  });
+
+  it('"הסקרים שלי" – asking by ownerId alone – is allowed', async () => {
+    // Rules are not filters: a query is allowed only when its own constraints prove
+    // the rule. This query says nothing about visibleTo, so it passes only because
+    // the read rule spells ownership out as a branch of its own. Without that the
+    // whole profile query is denied and the screen silently falls back to cache.
+    const db = as(env, OWNER);
+    await assertSucceeds(getDocs(query(
+      collection(db, 'polls'), where('ownerId', '==', OWNER)
+    )));
+  });
+
+  it('I may read my own poll even if visibleTo somehow does not list me', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc('polls/poll_orphan').set(
+        pollDoc({ ownerId: OWNER, visibleTo: ['someone_else'] })
+      );
+    });
+    const db = as(env, OWNER);
+    await assertSucceeds(getDocs(query(
+      collection(db, 'polls'), where('ownerId', '==', OWNER)
+    )));
+  });
+
+  it('asking by ownerId for somebody else is still rejected', async () => {
+    const db = as(env, FRIEND);
+    await assertFails(getDocs(query(
+      collection(db, 'polls'), where('ownerId', '==', OWNER)
+    )));
   });
 
   it('the archive query – finished polls I was allowed to see – is allowed', async () => {
