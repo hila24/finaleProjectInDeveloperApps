@@ -24,7 +24,9 @@ class VoteFragment : BaseFragment<FragmentVoteBinding>(FragmentVoteBinding::infl
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.imagesList.layoutManager = LinearLayoutManager(requireContext())
         binding.backButton.setOnClickListener { findNavController().popBackStack() }
-        binding.sendVoteButton.setOnClickListener { viewModel.submit(pollId) }
+        binding.sendVoteButton.setOnClickListener {
+            viewModel.submit(requireContext().applicationContext, pollId)
+        }
 
         viewModel.load(pollId)
 

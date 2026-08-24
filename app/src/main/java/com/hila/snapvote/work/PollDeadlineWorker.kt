@@ -16,7 +16,7 @@ import com.hila.snapvote.R
 import com.hila.snapvote.util.PollNotifications
 
 /**
- * Posts "your poll closes in an hour" and "your poll is closed" notifications.
+ * Posts the "your poll closes in 5 minutes" and "your poll is closed" notifications.
  * Tapping one opens the poll through the same deep link that is used for sharing.
  */
 class PollDeadlineWorker(
@@ -28,6 +28,14 @@ class PollDeadlineWorker(
         val pollId = inputData.getString(KEY_POLL_ID) ?: return Result.failure()
         val question = inputData.getString(KEY_QUESTION).orEmpty()
         val kind = inputData.getString(KEY_KIND) ?: KIND_CLOSED
+        val deadline = inputData.getLong(KEY_DEADLINE, 0L)
+
+        // WorkManager may run this later than asked, to save battery. The reminder only
+        // has a few minutes of lead, so a late run would announce "5 minutes left" for a
+        // poll that has already closed – and arrive after the closing notification.
+        if (kind == KIND_REMINDER && deadline > 0L && System.currentTimeMillis() >= deadline) {
+            return Result.success()
+        }
 
         val granted = ContextCompat.checkSelfPermission(
             applicationContext, Manifest.permission.POST_NOTIFICATIONS
@@ -73,6 +81,7 @@ class PollDeadlineWorker(
         const val KEY_POLL_ID = "pollId"
         const val KEY_QUESTION = "question"
         const val KEY_KIND = "kind"
+        const val KEY_DEADLINE = "deadline"
         const val KIND_REMINDER = "reminder"
         const val KIND_CLOSED = "closed"
     }

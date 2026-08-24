@@ -24,7 +24,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
         binding.myPollsList.adapter = adapter
         binding.historyGroup.setOnCheckedStateChangeListener { _, _ -> showSelectedHistory() }
         binding.logoutButton.setOnClickListener {
-            viewModel.logout()
+            viewModel.logout(requireContext().applicationContext)
             navigateSafely(R.id.action_global_login)
         }
         binding.friendsCard.setOnClickListener {

@@ -107,8 +107,8 @@
     <!-- Notifications -->
     <string name="notification_channel_name">תזכורות לסקרים</string>
     <string name="notification_channel_description">התראה לפני שסקר נסגר וכשהוא נסגר</string>
-    <string name="notify_reminder_title">⏳ נותרה שעה להצבעה</string>
-    <string name="notify_reminder_text">הסקר \"%1$s\" נסגר בעוד שעה</string>
+    <string name="notify_reminder_title">⏳ נותרו 5 דקות להצבעה</string>
+    <string name="notify_reminder_text">הסקר \"%1$s\" נסגר בעוד 5 דקות</string>
     <string name="notify_closed_title">🏆 הסקר נסגר</string>
     <string name="notify_closed_text">אפשר לראות מי ניצחה בסקר \"%1$s\"</string>
 

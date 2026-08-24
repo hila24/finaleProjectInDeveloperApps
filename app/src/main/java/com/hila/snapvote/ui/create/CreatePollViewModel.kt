@@ -130,8 +130,12 @@ class CreatePollViewModel(
                 )
             }.onSuccess { pollId ->
                 _uploadStatus.value = null
-                // Remind me an hour before it closes, and once it has.
-                PollNotifications.scheduleFor(context, pollId, question, deadline)
+                // Only the closing notification: the author cannot vote in their own
+                // poll, so "נותרו 5 דקות להצבעה" would be telling them to do something
+                // the app will not let them do. Their friends' phones book that one.
+                PollNotifications.scheduleFor(
+                    context, pollId, question, deadline, withReminder = false
+                )
                 _createdPollId.value = pollId
             }.onFailure {
                 _uploadStatus.value = null

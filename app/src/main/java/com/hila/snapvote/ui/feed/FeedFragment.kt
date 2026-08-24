@@ -1,7 +1,12 @@
 package com.hila.snapvote.ui.feed
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +21,11 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(FragmentFeedBinding::infl
 
     private val viewModel: FeedViewModel by viewModels()
     private val adapter by lazy { PollAdapter(onClick = ::openPoll) }
+
+    /** Reminders are a bonus – the feed works the same either way. */
+    private val requestNotifications = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* nothing to undo if it is refused */ }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.pollsList.layoutManager = LinearLayoutManager(requireContext())
@@ -33,8 +43,31 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(FragmentFeedBinding::infl
             binding.emptyState.isVisible = polls.isEmpty()
         }
         viewModel.loading.observe(viewLifecycleOwner) { binding.progress.isVisible = it }
-        viewModel.votedPollIds.observe(viewLifecycleOwner) { adapter.votedPollIds = it }
+        viewModel.votedPollIds.observe(viewLifecycleOwner) { voted ->
+            adapter.votedPollIds = voted
+            // Both lists are in place by now, so this is where reminders can be booked.
+            viewModel.scheduleReminders(requireContext().applicationContext)
+        }
         observeMessage(viewModel.error, viewModel::errorShown)
+
+        ensureNotificationPermission()
+    }
+
+    /**
+     * Asked here and not only when publishing: someone who just votes on friends' polls
+     * never opens the create screen, and without the permission their reminders would be
+     * scheduled and then silently dropped.
+     */
+    private fun ensureNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (viewModel.askedForNotifications) return
+        val granted = ContextCompat.checkSelfPermission(
+            requireContext(), Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) return
+
+        viewModel.askedForNotifications = true
+        requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     /** Already voted, or the poll is over? Go straight to the results. */

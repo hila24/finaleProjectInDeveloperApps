@@ -1,5 +1,6 @@
 package com.hila.snapvote.ui.profile
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.hila.snapvote.data.model.User
 import com.hila.snapvote.data.repository.AuthRepository
 import com.hila.snapvote.data.repository.FriendRepository
 import com.hila.snapvote.data.repository.PollRepository
+import com.hila.snapvote.util.PollNotifications
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
@@ -60,7 +62,15 @@ class ProfileViewModel(
         }
     }
 
-    fun logout() = auth.logout()
+    /**
+     * Signing out also drops the pending reminders. They are scheduled per device, so
+     * leaving them behind would notify whoever signs in next about polls that are not
+     * theirs – easy to hit when two accounts are tested on the same phone.
+     */
+    fun logout(context: Context) {
+        PollNotifications.cancelAll(context)
+        auth.logout()
+    }
 
     fun errorShown() {
         _error.value = null

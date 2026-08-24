@@ -1,5 +1,6 @@
 package com.hila.snapvote.ui.vote
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.hila.snapvote.data.repository.AlreadyVotedException
 import com.hila.snapvote.data.repository.AuthRepository
 import com.hila.snapvote.data.repository.PollClosedException
 import com.hila.snapvote.data.repository.PollRepository
+import com.hila.snapvote.util.PollNotifications
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -75,7 +77,7 @@ class VoteViewModel(
         }
     }
 
-    fun submit(pollId: String) {
+    fun submit(context: Context, pollId: String) {
         val uid = auth.currentUid ?: return
         val poll = _poll.value ?: return
 
@@ -99,6 +101,8 @@ class VoteViewModel(
                     ratings = if (poll.mode == Poll.MODE_RATING) ratings.toMap() else emptyMap(),
                 )
             }.onSuccess {
+                // Nothing left to hurry for; the closing notification still stands.
+                PollNotifications.cancelReminderFor(context, pollId)
                 _voteSent.value = true
             }.onFailure { throwable ->
                 _error.value = when (throwable) {
