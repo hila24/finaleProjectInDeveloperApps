@@ -136,6 +136,9 @@ class CreatePollViewModel(
                 PollNotifications.scheduleFor(
                     context, pollId, question, deadline, withReminder = false
                 )
+                // The pictures are safely in Firestore now, so the working copies on
+                // this phone have done their job.
+                clearWorkingCopies(context)
                 _createdPollId.value = pollId
             }.onFailure {
                 _uploadStatus.value = null
@@ -149,8 +152,37 @@ class CreatePollViewModel(
         _error.value = null
     }
 
+    /**
+     * Deletes the app's working copies of the picked pictures.
+     *
+     * Picking an image copies it into the cache (the gallery's permission grant expires
+     * before the upload finishes) and the camera writes a file of its own. Nothing used
+     * to remove either, so the phone that created a poll kept a full-size copy of every
+     * picture it ever uploaded – long after the poll itself was deleted. That quietly
+     * contradicts the one thing the app promises.
+     *
+     * Safe to call whenever no upload is in flight: the pictures are already in
+     * Firestore by then, and both folders are recreated on the next pick.
+     */
+    private suspend fun clearWorkingCopies(context: Context) = withContext(Dispatchers.IO) {
+        listOf(DIR_PICKED, DIR_CAMERA).forEach { name ->
+            runCatching { File(context.cacheDir, name).deleteRecursively() }
+        }
+    }
+
+    /**
+     * Sweeps copies left behind by a poll that was started and then abandoned.
+     * Called once when the screen opens, before anything has been picked.
+     */
+    fun clearAbandonedCopies(context: Context) {
+        viewModelScope.launch { clearWorkingCopies(context) }
+    }
+
+    /** Guards the one-time sweep of leftovers, so a rotation does not delete live picks. */
+    var clearedStaleCopies = false
+
     private fun copyToCache(context: Context, uri: Uri): Uri {
-        val dir = File(context.cacheDir, "picked").apply { mkdirs() }
+        val dir = File(context.cacheDir, DIR_PICKED).apply { mkdirs() }
         val target = File(dir, "${UUID.randomUUID()}.jpg")
         context.contentResolver.openInputStream(uri)?.use { input ->
             target.outputStream().use { output -> input.copyTo(output) }
@@ -160,5 +192,9 @@ class CreatePollViewModel(
 
     companion object {
         const val MAX_IMAGES = 6
+
+        /** Cache folders holding the app's working copies of the picked pictures. */
+        const val DIR_PICKED = "picked"
+        const val DIR_CAMERA = "camera"
     }
 }

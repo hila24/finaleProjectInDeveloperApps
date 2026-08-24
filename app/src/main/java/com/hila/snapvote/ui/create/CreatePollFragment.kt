@@ -67,6 +67,14 @@ class CreatePollFragment :
         binding.imagesList.adapter = adapter
         binding.backButton.setOnClickListener { findNavController().popBackStack() }
 
+        // Clear leftovers from a poll that was started and abandoned. Guarded by a flag
+        // on the ViewModel, which survives rotation – doing it on every onViewCreated
+        // would delete the copies of images the user has already picked.
+        if (!viewModel.clearedStaleCopies) {
+            viewModel.clearedStaleCopies = true
+            viewModel.clearAbandonedCopies(requireContext().applicationContext)
+        }
+
         binding.pickGalleryButton.setOnClickListener {
             pickImages.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -231,7 +239,8 @@ class CreatePollFragment :
     }
 
     private fun launchCamera() {
-        val dir = File(requireContext().cacheDir, "camera").apply { mkdirs() }
+        val dir = File(requireContext().cacheDir, CreatePollViewModel.DIR_CAMERA)
+            .apply { mkdirs() }
         val file = File(dir, "shot_${System.currentTimeMillis()}.jpg")
         val uri = FileProvider.getUriForFile(
             requireContext(),
