@@ -115,14 +115,14 @@
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="שעה" />
+                android:text="@string/deadline_1h" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/deadline6h"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="6 שעות" />
+                android:text="@string/deadline_6h" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/deadline24h"
@@ -130,14 +130,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="24 שעות" />
+                android:text="@string/deadline_24h" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/deadline3d"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3 ימים" />
+                android:text="@string/deadline_3d" />
+
+            <!-- Opens a date picker and then a clock; its label becomes the chosen time. -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/deadlineCustom"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/deadline_custom" />
         </com.google.android.material.chip.ChipGroup>
 
         <TextView

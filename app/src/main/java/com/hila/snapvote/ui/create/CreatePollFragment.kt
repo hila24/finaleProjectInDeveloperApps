@@ -13,12 +13,20 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointForward
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat as MaterialTimeFormat
 import com.hila.snapvote.R
 import com.hila.snapvote.data.model.Poll
 import com.hila.snapvote.databinding.FragmentCreatePollBinding
 import com.hila.snapvote.ui.common.BaseFragment
 import com.hila.snapvote.ui.common.pollArgs
+import com.hila.snapvote.util.Deadlines
+import com.hila.snapvote.util.TimeFormat
 import java.io.File
+import java.util.Calendar
 
 /** Upload images, pick a deadline, choose the voting style, publish. */
 class CreatePollFragment :
@@ -66,14 +74,25 @@ class CreatePollFragment :
         }
         binding.takePhotoButton.setOnClickListener { ensureCameraPermission() }
 
+        // Presets clear a hand-picked time; the custom chip is driven by its own click
+        // listener, so that tapping it again lets you choose a different moment.
         binding.deadlineGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-            viewModel.deadlineHours = when (checkedIds.firstOrNull()) {
+            val checked = checkedIds.firstOrNull()
+            if (checked == R.id.deadlineCustom) return@setOnCheckedStateChangeListener
+            viewModel.setCustomDeadline(null)
+            viewModel.deadlineHours = when (checked) {
                 R.id.deadline1h -> 1
                 R.id.deadline6h -> 6
                 R.id.deadline3d -> 72
                 else -> 24
             }
         }
+        binding.deadlineCustom.setOnClickListener { showDatePicker() }
+        viewModel.customDeadline.observe(viewLifecycleOwner) { at ->
+            binding.deadlineCustom.text =
+                if (at == null) getString(R.string.deadline_custom) else TimeFormat.dateTime(at)
+        }
+        restoreOpenPickers()
         binding.modeGroup.setOnCheckedChangeListener { _, checkedId ->
             viewModel.mode =
                 if (checkedId == R.id.modeRating) Poll.MODE_RATING else Poll.MODE_SINGLE
@@ -98,6 +117,89 @@ class CreatePollFragment :
             if (pollId == null) return@observe
             navigateSafely(R.id.action_create_to_results, pollArgs(pollId))
         }
+    }
+
+    // ------------------------------------------------------ custom deadline
+
+    /**
+     * Day first, then clock. Both dialogs are DialogFragments that survive a rotation
+     * on their own, but their listeners do not – see [restoreOpenPickers].
+     */
+    private fun showDatePicker() {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText(getString(R.string.deadline_pick_date))
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .setCalendarConstraints(
+                CalendarConstraints.Builder()
+                    .setValidator(DateValidatorPointForward.now())
+                    .build()
+            )
+            .build()
+        attachDateListeners(picker)
+        picker.show(childFragmentManager, TAG_DATE)
+    }
+
+    private fun attachDateListeners(picker: MaterialDatePicker<Long>) {
+        picker.addOnPositiveButtonClickListener { utcMidnight ->
+            viewModel.pendingDateUtc = utcMidnight
+            showTimePicker()
+        }
+        picker.addOnNegativeButtonClickListener { revertToPresetIfUnset() }
+        picker.addOnCancelListener { revertToPresetIfUnset() }
+    }
+
+    private fun showTimePicker() {
+        val now = Calendar.getInstance()
+        val picker = MaterialTimePicker.Builder()
+            .setTimeFormat(MaterialTimeFormat.CLOCK_24H)
+            .setHour(now.get(Calendar.HOUR_OF_DAY))
+            .setMinute(now.get(Calendar.MINUTE))
+            .setTitleText(getString(R.string.deadline_pick_time))
+            .build()
+        attachTimeListeners(picker)
+        picker.show(childFragmentManager, TAG_TIME)
+    }
+
+    private fun attachTimeListeners(picker: MaterialTimePicker) {
+        picker.addOnPositiveButtonClickListener {
+            commitCustomDeadline(picker.hour, picker.minute)
+        }
+        picker.addOnNegativeButtonClickListener { revertToPresetIfUnset() }
+        picker.addOnCancelListener { revertToPresetIfUnset() }
+    }
+
+    /** Re-attaches the listeners to dialogs that were already open before a rotation. */
+    private fun restoreOpenPickers() {
+        @Suppress("UNCHECKED_CAST")
+        (childFragmentManager.findFragmentByTag(TAG_DATE) as? MaterialDatePicker<Long>)
+            ?.let(::attachDateListeners)
+        (childFragmentManager.findFragmentByTag(TAG_TIME) as? MaterialTimePicker)
+            ?.let(::attachTimeListeners)
+    }
+
+    /**
+     * Joins the chosen day and the chosen clock time. The date dialog reports UTC
+     * midnight, so the day has to be read in UTC before being rebuilt in local time.
+     */
+    private fun commitCustomDeadline(hour: Int, minute: Int) {
+        val dayUtc = viewModel.pendingDateUtc ?: return revertToPresetIfUnset()
+        val chosen = Deadlines.combine(dayUtc, hour, minute)
+        viewModel.pendingDateUtc = null
+
+        // Today is a legal date and 09:00 is a legal time, but together they can be
+        // in the past – that pair only shows up here.
+        if (chosen.time <= System.currentTimeMillis()) {
+            showMessage(R.string.deadline_past)
+            revertToPresetIfUnset()
+            return
+        }
+        viewModel.setCustomDeadline(chosen)
+    }
+
+    /** Backing out of the dialogs should not leave the custom chip selected but empty. */
+    private fun revertToPresetIfUnset() {
+        viewModel.pendingDateUtc = null
+        if (viewModel.customDeadline.value == null) binding.deadline24h.isChecked = true
     }
 
     private fun publish() {
@@ -143,5 +245,11 @@ class CreatePollFragment :
     override fun onDestroyView() {
         binding.imagesList.adapter = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        /** Tags let the open dialogs be found again after a rotation. */
+        const val TAG_DATE = "deadline_date"
+        const val TAG_TIME = "deadline_time"
     }
 }

@@ -42,7 +42,36 @@ class CreatePollViewModel(
     val createdPollId: LiveData<String?> = _createdPollId
 
     var mode: String = Poll.MODE_SINGLE
+
+    /** One of the preset chips, counted from the moment the poll is published. */
     var deadlineHours: Int = 24
+
+    /**
+     * An exact moment the user picked themselves. When it is set it wins over
+     * [deadlineHours]; picking a preset chip again clears it.
+     *
+     * It lives here rather than in the fragment so it survives a screen rotation.
+     */
+    private val _customDeadline = MutableLiveData<Date?>(null)
+    val customDeadline: LiveData<Date?> = _customDeadline
+
+    fun setCustomDeadline(at: Date?) {
+        _customDeadline.value = at
+    }
+
+    /**
+     * The day chosen in the date dialog, waiting for the clock dialog that follows it.
+     * Kept here so that rotating the phone between the two dialogs does not lose it.
+     */
+    var pendingDateUtc: Long? = null
+
+    /**
+     * The deadline to publish with. Presets are resolved now, at publish time, so
+     * "שעה" means an hour from publishing and not an hour from picking the chip.
+     */
+    private fun resolveDeadline(): Date =
+        _customDeadline.value
+            ?: Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(deadlineHours.toLong()))
 
     /**
      * Copies the picked images into the app cache right away, so the poll can still be
@@ -74,7 +103,13 @@ class CreatePollViewModel(
             return
         }
         val pickedImages = _images.value.orEmpty()
-        val deadline = Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(deadlineHours.toLong()))
+        val deadline = resolveDeadline()
+        // A hand-picked time can go stale while the images upload, and a poll that is
+        // already closed would be rejected by the security rules anyway.
+        if (deadline.time <= System.currentTimeMillis()) {
+            _error.value = "המועד שנבחר כבר עבר – בחרי מועד חדש"
+            return
+        }
         _loading.value = true
         viewModelScope.launch {
             runCatching {
