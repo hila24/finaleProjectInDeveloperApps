@@ -62,7 +62,11 @@ class PollAdapter(
                 return
             }
             isVisible = true
-            loadBase64(image.thumb, cacheKey = "${poll.id}/${image.id}/thumb")
+            // A finished poll keeps its slot and its label, but not its picture.
+            loadBase64(
+                image.thumb.takeIf { poll.showsImages },
+                cacheKey = "${poll.id}/${image.id}/thumb",
+            )
         }
     }
 

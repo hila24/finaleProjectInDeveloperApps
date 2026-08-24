@@ -38,7 +38,10 @@ class ResultsAdapter : RefreshableListAdapter<PollImage, ResultsAdapter.ResultVi
             val context = binding.root.context
             val percent = poll.percentOf(image.id)
 
-            binding.image.loadBase64(image.thumb, cacheKey = "${poll.id}/${image.id}/thumb")
+            binding.image.loadBase64(
+                image.thumb.takeIf { poll.showsImages },
+                cacheKey = "${poll.id}/${image.id}/thumb",
+            )
 
             binding.title.text = context.getString(R.string.image_percent, image.label, percent)
             binding.bar.setProgressCompat(percent, true)

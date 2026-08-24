@@ -137,4 +137,28 @@ class PollTest {
         assertEquals(0, subject.voteCount)
         assertNull(subject.winner())
     }
+
+    // ------------------------------------------------------- hiding the pictures
+
+    @Test
+    fun `an open poll still shows its pictures`() {
+        assertTrue(poll(hoursFromNow = 3).showsImages)
+    }
+
+    @Test
+    fun `a finished poll hides its pictures the moment the deadline passes`() {
+        // The Base64 is still on the document here – cleanupExpiredPollsOf has not run,
+        // because that waits for the owner's next visit. The app must hide it anyway.
+        val justClosed = poll(hoursFromNow = -1).copy(
+            imagesDeleted = false,
+            images = listOf(PollImage(id = "img_0", label = "A", thumb = "still-here")),
+        )
+        assertFalse(justClosed.showsImages)
+    }
+
+    @Test
+    fun `a poll whose pictures were already wiped also hides them`() {
+        val cleaned = poll(hoursFromNow = -2).copy(imagesDeleted = true)
+        assertFalse(cleaned.showsImages)
+    }
 }

@@ -72,6 +72,19 @@ data class Poll(
     val isClosed: Boolean
         get() = (deadline?.toDate()?.time ?: 0L) <= System.currentTimeMillis()
 
+    /**
+     * Whether the pictures may still be drawn on screen.
+     *
+     * The Base64 is wiped from Firestore by `cleanupExpiredPollsOf`, but that only runs
+     * the next time the *owner* opens the app – nobody else is allowed to delete it. So
+     * between the deadline and that moment the pictures are still on the document, and
+     * every screen has to refuse to draw them on its own. Without this a finished poll
+     * opened from the profile archive would still show its pictures, which is the one
+     * promise the whole app is built on.
+     */
+    val showsImages: Boolean
+        get() = !isClosed
+
     val millisLeft: Long
         get() = (deadline?.toDate()?.time ?: 0L) - System.currentTimeMillis()
 

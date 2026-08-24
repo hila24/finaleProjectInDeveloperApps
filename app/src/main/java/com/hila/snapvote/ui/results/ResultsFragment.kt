@@ -75,9 +75,11 @@ class ResultsFragment : BaseFragment<FragmentResultsBinding>(FragmentResultsBind
         val winner = poll.winner()
         binding.winnerCard.isVisible = winner != null
         if (winner != null) {
+            // The winner is the one picture shown full size, so it is also the one that
+            // matters most to stop showing the moment the poll is over.
             val full = viewModel.fullImages.value?.get(winner.id)
             binding.winnerImage.loadBase64(
-                full ?: winner.thumb,
+                (full ?: winner.thumb).takeIf { poll.showsImages },
                 cacheKey = "${poll.id}/${winner.id}/" + if (full != null) "full" else "thumb",
             )
             binding.winnerCaption.text = getString(
@@ -94,8 +96,12 @@ class ResultsFragment : BaseFragment<FragmentResultsBinding>(FragmentResultsBind
             )
         }
 
+        // Tied to the deadline rather than to imagesDeleted, so the notice matches what
+        // is actually on screen: once the poll is over the pictures are gone from the
+        // app, even in the moments before the owner's next visit clears them from
+        // Firestore.
         binding.deletionNotice.text = getString(
-            if (poll.imagesDeleted) R.string.images_deleted else R.string.images_will_be_deleted
+            if (poll.showsImages) R.string.images_will_be_deleted else R.string.images_deleted
         )
 
         adapter.poll = poll
