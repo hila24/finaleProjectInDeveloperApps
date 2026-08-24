@@ -7,6 +7,14 @@
         { "fieldPath": "visibleTo", "arrayConfig": "CONTAINS" },
         { "fieldPath": "deadline", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "polls",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "visibleTo", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "deadline", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

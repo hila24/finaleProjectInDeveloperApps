@@ -27,6 +27,10 @@ class ProfileViewModel(
     private val _myPolls = MutableLiveData<List<Poll>>()
     val myPolls: LiveData<List<Poll>> = _myPolls
 
+    /** Finished polls of friends that I could see – reachable nowhere else once closed. */
+    private val _archivedPolls = MutableLiveData<List<Poll>>()
+    val archivedPolls: LiveData<List<Poll>> = _archivedPolls
+
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
@@ -42,6 +46,11 @@ class ProfileViewModel(
                 polls.myPollsFlow(uid)
                     .catch { _error.value = it.message }
                     .collect { _myPolls.value = it }
+            }
+            viewModelScope.launch {
+                polls.archivedPollsFlow(uid)
+                    .catch { _error.value = it.message }
+                    .collect { _archivedPolls.value = it }
             }
             viewModelScope.launch {
                 friends.friendsFlow(uid)

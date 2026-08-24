@@ -82,6 +82,9 @@
     <string name="votes_given">הצבעות שנתתי</string>
     <string name="history">היסטוריה</string>
     <string name="my_polls">הסקרים שלי</string>
+    <string name="my_polls_empty">עוד לא יצרת סקר.\nהקישי על ➕ בפיד כדי להתחיל.</string>
+    <string name="archive_polls">הצבעתי בהם</string>
+    <string name="archive_empty">כאן יופיעו סקרים של חברות שהסתיימו,\nכדי שתמיד אפשר יהיה לחזור לתוצאות.</string>
     <string name="delete_poll">מחיקת הסקר</string>
     <string name="delete_poll_confirm">למחוק את הסקר וכל התמונות שלו?</string>
     <string name="cancel">ביטול</string>

@@ -74,6 +74,32 @@ class PollRepository(
         awaitClose { registration.remove() }
     }
 
+    /**
+     * Finished polls that [uid] was allowed to see but did not create – the archive
+     * on the profile screen.
+     *
+     * A poll drops out of the feed the moment its deadline passes, so without this
+     * a voter has no way back to the results of a poll they took part in. The polls
+     * [uid] created are already listed by [myPollsFlow], so they are filtered out here.
+     */
+    fun archivedPollsFlow(uid: String): Flow<List<Poll>> = callbackFlow {
+        val registration = db.collection(POLLS)
+            .whereArrayContains("visibleTo", uid)
+            .whereLessThanOrEqualTo("deadline", Timestamp.now())
+            .orderBy("deadline", Query.Direction.DESCENDING)
+            .limit(ARCHIVE_LIMIT)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val polls = snapshot?.toObjects(Poll::class.java).orEmpty()
+                    .filterNot { it.ownerId == uid }
+                trySend(polls)
+            }
+        awaitClose { registration.remove() }
+    }
+
     /** Live updates for one poll – the results screen relies on this. */
     fun pollFlow(pollId: String): Flow<Poll?> = callbackFlow {
         val registration = db.collection(POLLS).document(pollId)
@@ -290,6 +316,9 @@ class PollRepository(
     }
 
     companion object {
+        /** How far back the profile archive reaches – enough for a course project. */
+        private const val ARCHIVE_LIMIT = 50L
+
         const val POLLS = "polls"
         const val VOTES = "votes"
         const val COMMENTS = "comments"

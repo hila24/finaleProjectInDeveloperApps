@@ -2,6 +2,7 @@ package com.hila.snapvote.ui.profile
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.hila.snapvote.R
 import com.hila.snapvote.data.model.Poll
@@ -10,7 +11,10 @@ import com.hila.snapvote.ui.common.BaseFragment
 import com.hila.snapvote.ui.common.pollArgs
 import com.hila.snapvote.ui.feed.PollAdapter
 
-/** Profile card, the counters and the history of polls I created. */
+/**
+ * Profile card, the counters, and two histories: the polls I created and the
+ * finished polls of friends I voted on.
+ */
 class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBinding::inflate) {
 
     private val viewModel: ProfileViewModel by viewModels()
@@ -18,6 +22,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.myPollsList.adapter = adapter
+        binding.historyGroup.setOnCheckedStateChangeListener { _, _ -> showSelectedHistory() }
         binding.logoutButton.setOnClickListener {
             viewModel.logout()
             navigateSafely(R.id.action_global_login)
@@ -37,8 +42,25 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
             binding.pollsCreated.text = user.pollsCreated.toString()
             binding.votesGiven.text = user.votesGiven.toString()
         }
-        viewModel.myPolls.observe(viewLifecycleOwner) { adapter.submitList(it) }
+        viewModel.myPolls.observe(viewLifecycleOwner) { showSelectedHistory() }
+        viewModel.archivedPolls.observe(viewLifecycleOwner) { showSelectedHistory() }
         observeMessage(viewModel.error, viewModel::errorShown)
+    }
+
+    /**
+     * Both histories share one list, so the chip decides what is on screen.
+     * Called from the chip listener and from either list arriving.
+     */
+    private fun showSelectedHistory() {
+        val showArchive = binding.historyGroup.checkedChipId == R.id.historyArchive
+        val polls =
+            if (showArchive) viewModel.archivedPolls.value else viewModel.myPolls.value
+
+        adapter.submitList(polls.orEmpty())
+        binding.historyEmpty.setText(
+            if (showArchive) R.string.archive_empty else R.string.my_polls_empty
+        )
+        binding.historyEmpty.isVisible = polls != null && polls.isEmpty()
     }
 
     private fun openResults(poll: Poll) {
