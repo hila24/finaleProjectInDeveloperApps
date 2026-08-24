@@ -297,16 +297,13 @@ class PollRepository(
         snapshot.toObjects(Poll::class.java)
             .filter { it.isClosed && !it.imagesDeleted }
             .forEach { poll ->
+                // Only the full-size copies go. The thumbnails stay on the poll document
+                // so the owner keeps their own history – they are ~12KB against ~930KB,
+                // so this still reclaims almost all of the space.
                 deleteImageDocuments(poll.id)
-                db.collection(POLLS).document(poll.id).update(
-                    mapOf(
-                        "imagesDeleted" to true,
-                        // keep ids and labels so the results still make sense
-                        "images" to poll.images.map {
-                            mapOf("id" to it.id, "label" to it.label, "thumb" to "")
-                        },
-                    )
-                ).await()
+                db.collection(POLLS).document(poll.id)
+                    .update("imagesDeleted", true)
+                    .await()
             }
     }
 

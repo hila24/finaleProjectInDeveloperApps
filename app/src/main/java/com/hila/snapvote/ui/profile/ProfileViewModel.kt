@@ -36,6 +36,8 @@ class ProfileViewModel(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    val currentUid: String? get() = auth.currentUid
+
     init {
         viewModelScope.launch {
             auth.currentUserFlow()

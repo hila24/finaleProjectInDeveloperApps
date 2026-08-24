@@ -21,6 +21,13 @@ class ResultsAdapter : RefreshableListAdapter<PollImage, ResultsAdapter.ResultVi
             refreshRows()
         }
 
+    /** Who is looking – a finished poll keeps its pictures only for its own author. */
+    var viewerUid: String? = null
+        set(value) {
+            field = value
+            refreshRows()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultViewHolder {
         val binding = ItemResultBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ResultViewHolder(binding)
@@ -39,7 +46,7 @@ class ResultsAdapter : RefreshableListAdapter<PollImage, ResultsAdapter.ResultVi
             val percent = poll.percentOf(image.id)
 
             binding.image.loadBase64(
-                image.thumb.takeIf { poll.showsImages },
+                image.thumb.takeIf { poll.showsImagesTo(viewerUid) },
                 cacheKey = "${poll.id}/${image.id}/thumb",
             )
 

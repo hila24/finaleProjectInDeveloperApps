@@ -22,6 +22,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(FragmentProfileBind
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.myPollsList.adapter = adapter
+        // My own finished polls keep their pictures; the archive of friends' polls does not.
+        adapter.viewerUid = viewModel.currentUid
         binding.historyGroup.setOnCheckedStateChangeListener { _, _ -> showSelectedHistory() }
         binding.logoutButton.setOnClickListener {
             viewModel.logout(requireContext().applicationContext)

@@ -25,6 +25,13 @@ class PollAdapter(
             refreshRows()
         }
 
+    /** Who is looking – a finished poll keeps its pictures only for its own author. */
+    var viewerUid: String? = null
+        set(value) {
+            field = value
+            refreshRows()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PollViewHolder {
         val binding = ItemPollBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PollViewHolder(binding)
@@ -64,7 +71,7 @@ class PollAdapter(
             isVisible = true
             // A finished poll keeps its slot and its label, but not its picture.
             loadBase64(
-                image.thumb.takeIf { poll.showsImages },
+                image.thumb.takeIf { poll.showsImagesTo(viewerUid) },
                 cacheKey = "${poll.id}/${image.id}/thumb",
             )
         }

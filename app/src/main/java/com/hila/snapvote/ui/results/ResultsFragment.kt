@@ -79,7 +79,7 @@ class ResultsFragment : BaseFragment<FragmentResultsBinding>(FragmentResultsBind
             // matters most to stop showing the moment the poll is over.
             val full = viewModel.fullImages.value?.get(winner.id)
             binding.winnerImage.loadBase64(
-                (full ?: winner.thumb).takeIf { poll.showsImages },
+                (full ?: winner.thumb).takeIf { poll.showsImagesTo(viewModel.currentUid) },
                 cacheKey = "${poll.id}/${winner.id}/" + if (full != null) "full" else "thumb",
             )
             binding.winnerCaption.text = getString(
@@ -96,14 +96,16 @@ class ResultsFragment : BaseFragment<FragmentResultsBinding>(FragmentResultsBind
             )
         }
 
-        // Tied to the deadline rather than to imagesDeleted, so the notice matches what
-        // is actually on screen: once the poll is over the pictures are gone from the
-        // app, even in the moments before the owner's next visit clears them from
-        // Firestore.
+        // Three different truths, depending on who is reading it.
         binding.deletionNotice.text = getString(
-            if (poll.showsImages) R.string.images_will_be_deleted else R.string.images_deleted
+            when {
+                !poll.isClosed -> R.string.images_will_be_deleted
+                isMine -> R.string.images_kept_for_owner
+                else -> R.string.images_deleted
+            }
         )
 
+        adapter.viewerUid = viewModel.currentUid
         adapter.poll = poll
         adapter.submitList(poll.images.sortedByDescending { poll.tally[it.id] ?: 0 })
     }

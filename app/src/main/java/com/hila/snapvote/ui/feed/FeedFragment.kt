@@ -30,6 +30,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(FragmentFeedBinding::infl
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.pollsList.layoutManager = LinearLayoutManager(requireContext())
         binding.pollsList.adapter = adapter
+        adapter.viewerUid = viewModel.currentUid
 
         binding.newPollButton.setOnClickListener {
             navigateSafely(R.id.action_feed_to_create)

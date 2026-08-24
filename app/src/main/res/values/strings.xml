@@ -68,7 +68,8 @@
     <string name="results_title">תוצאות הסקר</string>
     <string name="winner">🏆 התמונה המנצחת</string>
     <string name="image_percent">תמונה %1$s — %2$d%%</string>
-    <string name="images_will_be_deleted">⏳ התמונות יימחקו בתום הסקר</string>
+    <string name="images_will_be_deleted">⏳ בתום הסקר התמונות ייעלמו אצל החברות</string>
+    <string name="images_kept_for_owner">🔒 רק את רואה את התמונות — אצל החברות הן נעלמו</string>
     <string name="images_deleted">התמונות נמחקו אוטומטית 🗑️</string>
     <string name="avg_rating">דירוג ממוצע: %1$s</string>
     <string name="share_poll">שיתוף עם חברים</string>
