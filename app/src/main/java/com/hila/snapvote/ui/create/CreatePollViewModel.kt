@@ -133,8 +133,11 @@ class CreatePollViewModel(
                 // Only the closing notification: the author cannot vote in their own
                 // poll, so "נותרו 5 דקות להצבעה" would be telling them to do something
                 // the app will not let them do. Their friends' phones book that one.
+                // ownerId makes the closing job delete the pictures at the deadline,
+                // rather than waiting for the next time this app is opened.
                 PollNotifications.scheduleFor(
-                    context, pollId, question, deadline, withReminder = false
+                    context, pollId, question, deadline,
+                    withReminder = false, ownerId = uid,
                 )
                 // The pictures are safely in Firestore now, so the working copies on
                 // this phone have done their job.
