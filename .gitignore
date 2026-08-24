@@ -16,3 +16,8 @@ local.properties
 
 # Firebase CLI deploy cache
 .firebase/
+
+# Node deps for the Firestore rules tests
+firestore-tests/node_modules/
+firestore-debug.log
+firebase-debug.log
